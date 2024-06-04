@@ -10,8 +10,8 @@ public class MainMenu {
             System.out.println("========================================= ");
             System.out.println("       * Welcome to Home Service *        ");
             System.out.println("========================================= ");
-            System.out.println("1) Customer user panel                    ");
-            System.out.println("2) Admin user panel                       ");
+            System.out.println("1) Admin user panel                       ");
+            System.out.println("2) Customer user panel                    ");
             System.out.println("3) specialist user panel                  ");
             System.out.println("0) Exit                                   ");
             System.out.println("------------------------------------------");
@@ -19,9 +19,9 @@ public class MainMenu {
                 String input = scanner.nextLine();
                 switch (input) {
 
-                    case "1" -> CustomerMenu.customerPanel();
+                    case "1" -> AdminMenu.adminPanel();
 
-                    case "2" -> AdminMenu.adminPanel();
+                    case "2" -> CustomerMenu.customerPanel();
 
                     case "3" -> SpecialistMenu.specialistPanel();
 

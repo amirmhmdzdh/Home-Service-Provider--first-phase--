@@ -5,10 +5,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
@@ -16,12 +15,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@SuperBuilder
 public class BaseEntity<ID extends Serializable> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private ID id;
-
-    @Pattern(regexp = "yyyy-MM-dd")
-    private LocalDateTime registrationTime = LocalDateTime.now();
-
 }

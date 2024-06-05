@@ -55,10 +55,11 @@ public class AdminMenu {
                 System.out.println("============================================= ");
                 System.out.println("1) Create Main Service                        ");
                 System.out.println("2) Create Sub Service                         ");
-                System.out.println("3) Confirm Specialist Information             ");
-                System.out.println("4) print Specialist Image                     ");
-                System.out.println("5) giveJob                                    ");
-                System.out.println("6) Delete the Specialist from the sub-service ");
+                System.out.println("3) Update Sub Service                         ");
+                System.out.println("4) Confirm Specialist Information             ");
+                System.out.println("5) print Specialist Image                     ");
+                System.out.println("6) giveJob                                    ");
+                System.out.println("7) Delete the Specialist from the sub-service ");
                 System.out.println("0) EXIT                                       ");
                 System.out.println("--------------------------------------------- ");
 
@@ -69,13 +70,15 @@ public class AdminMenu {
 
                     case "2" -> createSubService();
 
-                    case "3" -> confirmInformation();
+                    case "3" -> updateSubService();
 
-                    case "4" -> printImage();
+                    case "4" -> confirmInformation();
 
-                    case "5" -> giveJob();
+                    case "5" -> printImage();
 
-                    case "6" -> deleteSpecialistService();
+                    case "6" -> giveJob();
+
+                    case "7" -> deleteSpecialistService();
 
                     case "0" -> {
                         return;
@@ -196,7 +199,7 @@ public class AdminMenu {
 
     public static void giveJob() {
 
-        List<SubService> subServiceList = subServicesService.findAll().stream().toList();
+        List<SubService> subServiceList = subServicesService.findAll();
         List<Specialist> newSpecialists = specialistService.findAll().stream()
                 .filter(specialist -> specialist.getStatus() == SpecialistStatus.CONFIRMED)
                 .toList();
@@ -272,6 +275,32 @@ public class AdminMenu {
             subService.getSpecialistList().remove(specialist);
             subServicesService.saveOrUpdate(subService);
             System.out.println("Specialist removed from the sub-service successfully.");
+        }
+    }
+
+    public static void updateSubService() {
+
+        List<SubService> subServiceList = subServicesService.findAll();
+
+        System.out.println("Available SubService to Update :");
+        for (int i = 0; i < subServiceList.size(); i++) {
+            System.out.println((i + 1) + ". " + subServiceList.get(i));
+        }
+        System.out.println("Select an subService (enter the number): ");
+        int selectedSub = scanner.nextInt();
+        scanner.nextLine();
+
+        if (selectedSub > 0 && selectedSub <= subServiceList.size()) {
+            SubService subService = subServiceList.get(selectedSub - 1);
+            System.out.println("Description ->> ");
+            String description = scanner.nextLine();
+            subService.setDescription(description);
+
+            System.out.println("base Price ->> ");
+            Long bestPrice = scanner.nextLong();
+            subService.setBasePrice(bestPrice);
+
+            subServicesService.saveOrUpdate(subService);
         }
     }
 

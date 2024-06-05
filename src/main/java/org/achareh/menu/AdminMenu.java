@@ -8,6 +8,8 @@ import org.achareh.model.user.enums.SpecialistStatus;
 import org.achareh.service.*;
 import org.achareh.utility.ApplicationContext;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class AdminMenu {
@@ -54,11 +56,9 @@ public class AdminMenu {
                 System.out.println("1) Create Main Service                        ");
                 System.out.println("2) Create Sub Service                         ");
                 System.out.println("3) Confirm Specialist Information             ");
-                System.out.println("4) giveJob                                    ");
-                System.out.println("5) delete Main Service                        ");
-                System.out.println("6) Update Sub Service                         ");
-                System.out.println("7) delete Sub Service                         ");
-                System.out.println("8) Delete the Specialist from the sub-service ");
+                System.out.println("4) print Specialist Image                     ");
+                System.out.println("5) giveJob                                    ");
+                System.out.println("6) Delete the Specialist from the sub-service ");
                 System.out.println("0) EXIT                                       ");
                 System.out.println("--------------------------------------------- ");
 
@@ -71,15 +71,11 @@ public class AdminMenu {
 
                     case "3" -> confirmInformation();
 
-                    case "4" -> giveJob();
+                    case "4" -> printImage();
 
-                    case "5" -> deleteMainService();
+                    case "5" -> giveJob();
 
-                    case "6" -> updateSubService();
-
-                    case "7" -> deleteSubService();
-
-                    case "8" -> deleteSpecialistService();
+                    case "6" -> deleteSpecialistService();
 
                     case "0" -> {
                         return;
@@ -199,17 +195,17 @@ public class AdminMenu {
     }
 
     public static void giveJob() {
+
+        List<SubService> subServiceList = subServicesService.findAll().stream().toList();
+        List<Specialist> newSpecialists = specialistService.findAll().stream()
+                .filter(specialist -> specialist.getStatus() == SpecialistStatus.CONFIRMED)
+                .toList();
+
+        List<String> specialistStrings = new ArrayList<>();
+        newSpecialists.forEach(specialist -> specialistStrings.add("id:" + specialist.getId() + " - firstName: "
+                + specialist.getFirstName() + " - lastName: " + specialist.getLastName() + " - Email: "
+                + specialist.getEmail() + " - Status: " + specialist.getStatus()));
         try {
-            List<SubService> subServiceList = subServicesService.findAll().stream().toList();
-            List<Specialist> newSpecialists = specialistService.findAll().stream()
-                    .filter(specialist -> specialist.getStatus() == SpecialistStatus.CONFIRMED)
-                    .toList();
-
-            List<String> specialistStrings = new ArrayList<>();
-            newSpecialists.forEach(specialist -> specialistStrings.add("id:" + specialist.getId() + " - firstName: "
-                    + specialist.getFirstName() + " - lastName: " + specialist.getLastName() + " - Email: "
-                    + specialist.getEmail() + " - Status: " + specialist.getStatus()));
-
             System.out.println("Available subServices: ");
             for (int i = 0; i < subServiceList.size(); i++) {
                 System.out.println((i + 1) + ". " + subServiceList.get(i));
@@ -240,105 +236,76 @@ public class AdminMenu {
         }
     }
 
-    public static void updateSubService() {
-
-        System.out.println("Which Sub service do you want to update ? ");
-        subServicesService.findAll().stream()
-                .map(subService -> subService.getId() + ") " + subService.getName())
-                .forEach(System.out::println);
-
-        Long select = scanner.nextLong();
-        scanner.nextLine();
-
-        try {
-            Optional<SubService> optionalSubService = subServicesService.findById(select);
-            if (optionalSubService.isPresent()) {
-                SubService subService = optionalSubService.get();
-                System.out.println("Enter Sub Service:");
-                String nameOfSub = scanner.nextLine();
-                System.out.println("Description:");
-                String description = scanner.nextLine();
-                System.out.println("Base Price:");
-                Long basePrice = scanner.nextLong();
-
-                List<SubService> all = subServicesService.findAll();
-                boolean subServiceExists = all.stream()
-                        .anyMatch(s -> s.getName().equals(nameOfSub));
-                if (subServiceExists) {
-                    System.out.println("Your sub service already exists.");
-                    return;
-                }
-                subService.setName(nameOfSub);
-                subService.setDescription(description);
-                subService.setBasePrice(basePrice);
-                subServicesService.saveOrUpdate(subService);
-                System.out.println("Sub service deleted successfully!");
-            } else {
-                System.out.println("Sub service not found.");
-            }
-        } catch (Exception e) {
-            System.out.println("An error occurred: " + e.getMessage());
-        }
-    }
-
-
-    public static void deleteMainService() {
-        System.out.println("Which Main service do you want to delete? ");
-        mainServiceService.findAll().stream()
-                .map(mainService -> mainService.getId() + ") " + mainService.getName())
-                .forEach(System.out::println);
-        Long select = scanner.nextLong();
-        scanner.nextLine();
-
-        Optional<MainService> optionalMainService = mainServiceService.findById(select);
-        if (optionalMainService.isPresent()) {
-            MainService mainService = optionalMainService.get();
-            mainServiceService.delete(mainService);
-
-        }
-    }
-
-    public static void deleteSubService() {
-        System.out.println("Which Sub service do you want to delete? ");
-        subServicesService.findAll().stream()
-                .map(subService -> subService.getId() + ") " + subService.getName())
-                .forEach(System.out::println);
-
-        Long select = scanner.nextLong();
-        scanner.nextLine();
-
-        try {
-            Optional<SubService> optionalSubService = subServicesService.findById(select);
-            if (optionalSubService.isPresent()) {
-                SubService subService = optionalSubService.get();
-                subServicesService.delete(subService);
-                System.out.println("Sub service deleted successfully!");
-            } else {
-                System.out.println("Sub service not found.");
-            }
-        } catch (Exception e) {
-            System.out.println("An error occurred: " + e.getMessage());
-        }
-    }
-
     public static void deleteSpecialistService() {
 
-        System.out.println("Which specialistService do you want to delete? ");
-        specialistService.findAll().stream()
-                .map(specialist -> specialist.getId() + ") " + specialist.getLastName() + specialist.getSubServicesList())
-                .forEach(System.out::println);
-        Long select = scanner.nextLong();
+        List<Specialist> specialistList = specialistService.findAll();
+        List<String> newSpecialists = new ArrayList<>();
+        specialistList.stream()
+                .filter(specialist -> specialist.getSubServicesList() != null)
+                .toList()
+                .forEach(specialist -> newSpecialists.add(" - firstName: " + specialist.getFirstName() +
+                        " - lastName: " + specialist.getLastName() + " - Email: "
+                        + specialist.getEmail()));
+
+        System.out.println("Available specialists: ");
+        for (int i = 0; i < newSpecialists.size(); i++) {
+            System.out.println((i + 1) + ". " + newSpecialists.get(i));
+        }
+        System.out.println("Select a specialist (enter the number): ");
+        int selectedSpecialist = scanner.nextInt();
+        scanner.nextLine();
+        Specialist specialist = specialistList.get(selectedSpecialist - 1);
+
+        List<SubService> subServiceList = specialist.getSubServicesList();
+
+        System.out.println("Available subServices: ");
+        for (int i = 0; i < subServiceList.size(); i++) {
+            System.out.println((i + 1) + ". " + subServiceList.get(i));
+        }
+        System.out.println("Select a subService (enter the number): ");
+        int selectedSubService = scanner.nextInt();
         scanner.nextLine();
 
-        try {
-            Optional<Specialist> optionalSpecialist = specialistService.findById(select);
-            if (optionalSpecialist.isPresent()) {
-                Specialist specialist = optionalSpecialist.get();
-                specialistService.delete(specialist);
+        if (selectedSubService > 0 && selectedSubService <= subServiceList.size()) {
+            SubService subService = subServiceList.get(selectedSubService - 1);
+
+            subService.getSpecialistList().remove(specialist);
+            subServicesService.saveOrUpdate(subService);
+            System.out.println("Specialist removed from the sub-service successfully.");
+        }
+    }
+
+    public static void printImage() {
+        List<Specialist> newSpecialists = specialistService.findAll().stream()
+                .filter(specialist -> specialist.getStatus() == SpecialistStatus.CONFIRMED)
+                .toList();
+
+        List<String> specialistStrings = new ArrayList<>();
+        newSpecialists.forEach(specialist -> specialistStrings.add(" - firstName: "
+                + specialist.getFirstName() + " - lastName: " + specialist.getLastName() + " - Email: "
+                + specialist.getEmail() + " - Status: " + specialist.getStatus()));
+
+        System.out.println("Available specialists: ");
+        for (int i = 0; i < specialistStrings.size(); i++) {
+            System.out.println((i + 1) + ". " + specialistStrings.get(i));
+        }
+        System.out.println("Select a specialist (enter the number): ");
+        int selectedSpecialist = scanner.nextInt();
+        scanner.nextLine();
+
+        if (selectedSpecialist > 0 && selectedSpecialist <= specialistStrings.size()) {
+            Specialist specialist = newSpecialists.get(selectedSpecialist - 1);
+
+            System.out.println("Specify the address of your storage location: ");
+            String filePath = scanner.nextLine();
+            try (FileOutputStream image = new FileOutputStream(filePath)) {
+                image.write(specialist.getImage());
+                System.out.println("Photo saved");
+            } catch (IOException e) {
+                System.out.println("Error saving photo: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            scanner.nextLine();
+        } else {
+            System.out.println("Invalid specialist selection. Please try again.");
         }
     }
 }

@@ -3,7 +3,6 @@ package org.achareh.base.service.impl;
 import org.achareh.base.entity.BaseEntity;
 import org.achareh.base.repository.BaseRepository;
 import org.achareh.base.service.BaseService;
-import org.achareh.exception.NotFoundExeption;
 import org.achareh.utility.EntityValidator;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -36,10 +35,10 @@ public class BaseServiceImpl<T extends BaseEntity<ID>,
     public T saveOrUpdate(T entity) {
         Transaction transaction = null;
 
-//        if (!isValid(entity)) {
-//            System.out.println("Invalid entity. Aborting saveOrUpdate operation.");
-//            return null;
-//        }
+        if (!isValid(entity)) {
+            System.out.println("Invalid entity. Aborting saveOrUpdate operation.");
+            return null;
+        }
         try (Session session = sessionFactory.getCurrentSession()) {
             transaction = session.beginTransaction();
             T t = repository.saveOrUpdate(entity);
@@ -90,18 +89,6 @@ public class BaseServiceImpl<T extends BaseEntity<ID>,
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;
-        }
-    }
-
-    @Override
-    public void deleteById(ID id) {
-        try (Session session = sessionFactory.getCurrentSession()) {
-            session.beginTransaction();
-            Optional<T> findEntity = repository.findById(id);
-            findEntity.orElseThrow(() -> new NotFoundExeption(String.format("Entity with id : %s not found", id)));
-            repository.delete(findEntity.get());
-            session.getTransaction().commit();
-        } catch (Exception ignored) {
         }
     }
 

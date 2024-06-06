@@ -16,8 +16,6 @@ public interface BaseService<T extends BaseEntity<ID>, ID extends Serializable> 
 
     List<T> findAll();
 
-    void deleteById(ID id);
-
     boolean isValid(T t);
 
 }

@@ -33,8 +33,7 @@ public class SpecialistMenu {
             System.out.println("=========================================");
             System.out.println("1) Sign Up                               ");
             System.out.println("2) Sign In                               ");
-            System.out.println("3) Edit Password                         ");
-            System.out.println("4) EXIT                                  ");
+            System.out.println("0) EXIT                                  ");
             System.out.println("-----------------------------------------");
             try {
                 String input = scanner.nextLine();
@@ -44,9 +43,7 @@ public class SpecialistMenu {
 
                     case "2" -> specialistSignIn();
 
-                    case "3" -> editePassword();
-
-                    case "4" -> {
+                    case "0" -> {
                         return;
                     }
                     default -> System.out.println(" <<< Wrong entry >>>");
@@ -63,9 +60,8 @@ public class SpecialistMenu {
             System.out.println("              * User MENU *              ");
             System.out.println("=========================================");
             System.out.println("1) New Offers                            ");
-            System.out.println("2)                                       ");
-            System.out.println("3)                                       ");
-            System.out.println("4) EXIT                                  ");
+            System.out.println("2) Edit Password                         ");
+            System.out.println("0) EXIT                                  ");
             System.out.println("---------------------------------------- ");
             try {
                 String input = scanner.nextLine();
@@ -73,11 +69,9 @@ public class SpecialistMenu {
 
                     case "1" -> newOffers();
 
-                    case "2" -> specialistSignIn();
+                    case "2" -> editePassword();
 
-                    case "3" -> editePassword();
-
-                    case "4" -> {
+                    case "0" -> {
                         return;
                     }
                     default -> System.out.println(" <<< Wrong entry >>>");

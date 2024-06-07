@@ -113,6 +113,14 @@ public class AdminMenu {
         System.out.println();
         System.out.println("Enter Main Service ->> ");
         String main = scanner.nextLine();
+
+        List<MainService> all = mainServiceService.findAll();
+        boolean subServiceExists = all.stream()
+                .anyMatch(m -> m.getName().equals(main));
+        if (subServiceExists) {
+            System.out.println("Your Main service already exists.");
+            return;
+        }
         MainService mainService = MainService.builder()
                 .name(main)
                 .build();

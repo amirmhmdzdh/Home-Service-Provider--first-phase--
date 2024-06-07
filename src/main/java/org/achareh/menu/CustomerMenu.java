@@ -229,35 +229,53 @@ public class CustomerMenu {
                     System.out.println("Proposed price ->");
                     Long proposedPrice = scanner.nextLong();
                     scanner.nextLine();
-                    System.out.println("Description ->");
-                    String description = scanner.nextLine();
-                    System.out.println("Execution time (yyyy-MM-dd HH:mm) ->");
-                    String executionTimeString = scanner.nextLine();
-                    LocalDateTime executionTime = LocalDateTime
-                            .parse(executionTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                    System.out.println("End time (yyyy-MM-dd HH:mm) ->");
-                    String endTimeString = scanner.nextLine();
-                    LocalDateTime endTime = LocalDateTime
-                            .parse(endTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                    if (proposedPrice >= subService.getBasePrice()) {
+                        System.out.println("Description ->");
+                        String description = scanner.nextLine();
+                        System.out.println("Execution time (yyyy-MM-dd HH:mm) ->");
+                        String executionTimeString = scanner.nextLine();
+                        LocalDateTime executionTime = LocalDateTime
+                                .parse(executionTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                        if (executionTime.isAfter(LocalDateTime.now())) {
+                            System.out.println("End time (yyyy-MM-dd HH:mm) ->");
+                            String endTimeString = scanner.nextLine();
+                            LocalDateTime endTime = LocalDateTime
+                                    .parse(endTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                            if (endTime.isAfter(executionTime)) {
+                                orders = Orders.builder()
+                                        .subServices(subService)
+                                        .address(address)
+                                        .proposedPrice(proposedPrice)
+                                        .description(description)
+                                        .executionTime(executionTime)
+                                        .endTime(endTime)
+                                        .customer(customer)
+                                        .orderStatus(OrderStatus.WAITING_FOR_SPECIALIST_SUGGESTION)
+                                        .build();
+                                List<Orders> all = orderService.findAll();
+                                boolean orderServiceExists = all.stream()
+                                        .anyMatch(o -> o.getExecutionTime().equals(executionTime));
+                                if (orderServiceExists) {
+                                    System.out.println("Your order already exists.");
+                                    return;
+                                }
 
-                    orders = Orders.builder()
-                            .subServices(subService)
-                            .address(address)
-                            .proposedPrice(proposedPrice)
-                            .description(description)
-                            .executionTime(executionTime)
-                            .endTime(endTime)
-                            .customer(customer)
-                            .orderStatus(OrderStatus.WAITING_FOR_SPECIALIST_SUGGESTION)
-                            .build();
-                    orderService.saveOrUpdate(orders);
+
+                                orderService.saveOrUpdate(orders);
+                            } else
+                                System.out.println("Invalid endTime");
+                        } else
+                            System.out.println("invalid executionTime");
+                    } else
+                        System.out.println("It is less than the base amount");
                 }
             }
-        } catch (NoSuchElementException e) {
+
+        } catch (
+                NoSuchElementException e) {
             System.out.println("Invalid input.");
         }
     }
-
 
     public static void trackOrders() {
 
